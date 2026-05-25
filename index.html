@@ -31,40 +31,75 @@
       margin-bottom: 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .buttons { display: none; flex-direction: column; gap: 12px; margin-top: 20px; width: 100%; max-width: 300px; }
+    .instruction {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .instruction p { font-size: 15px; line-height: 1.5; margin: 0; }
     .btn {
-      padding: 14px;
+      padding: 14px 24px;
       border-radius: 10px;
       font-size: 16px;
       font-weight: bold;
       text-decoration: none;
       text-align: center;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
     }
-    .btn-white { background: white; color: #F27A1A; }
+    .btn-white { background: white; color: #F27A1A; border: none; cursor: pointer; }
     .btn-outline { background: transparent; color: white; border: 2px solid white; }
+    .dots { font-size: 28px; letter-spacing: 4px; margin-top: 4px; }
   </style>
 </head>
 <body>
   <div class="spinner" id="spinner"></div>
   <p id="message">Just a moment...</p>
-  <div class="buttons" id="buttons">
-    <a class="btn btn-white" id="mainBtn" href="#">Open Page</a>
+
+  <!-- Shown only inside TikTok browser -->
+  <div class="instruction" id="instruction">
+    <div class="dots">⋯</div>
+    <p>Tap the <strong>3 dots</strong> in the top right corner<br>then select <strong>"Open in browser"</strong></p>
+    <p style="font-size:13px; opacity:0.85">This lets the Trendyol app open properly</p>
+    <a class="btn btn-outline" id="fallbackBtn" href="#">Or tap here to open in browser</a>
   </div>
 
   <script>
-    // ty.gl link handles app routing, store fallback, and web fallback natively
-    const parts = ["https://ty", ".gl/otkiqrb935h5e"];
-    const dest = parts.join("");
+    const dest = ["https://ty", ".gl/otkiqrb935h5e"].join("");
 
-    document.getElementById("mainBtn").href = dest;
+    // Detect TikTok WebView
+    const isTikTok = /musical_ly|tiktok/i.test(navigator.userAgent);
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isAndroid = /android/i.test(navigator.userAgent);
 
-    window.location = dest;
+    document.getElementById("fallbackBtn").href = dest;
 
-    setTimeout(() => {
-      document.getElementById("spinner").style.display = "none";
-      document.getElementById("message").textContent = "Tap below to continue.";
-      document.getElementById("buttons").style.display = "flex";
-    }, 2000);
+    if (isTikTok) {
+      // Can't auto-redirect from TikTok WebView — instruct user to open in system browser
+      setTimeout(() => {
+        document.getElementById("spinner").style.display = "none";
+        document.getElementById("message").style.display = "none";
+        document.getElementById("instruction").style.display = "flex";
+      }, 800);
+    } else {
+      // Outside TikTok — normal redirect
+      window.location = dest;
+
+      setTimeout(() => {
+        document.getElementById("spinner").style.display = "none";
+        document.getElementById("message").textContent = "Tap below to continue.";
+
+        const btn = document.createElement("a");
+        btn.className = "btn btn-white";
+        btn.href = dest;
+        btn.textContent = "Open Page";
+        btn.style.marginTop = "16px";
+        document.body.appendChild(btn);
+      }, 2000);
+    }
   </script>
 </body>
 </html>
