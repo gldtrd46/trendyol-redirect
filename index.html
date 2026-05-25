@@ -2,10 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Just a moment...</title>
-  <meta property="og:title" content="Just a moment..." />
-  <meta property="og:description" content="" />
-  <meta name="robots" content="noindex, nofollow" />
+  <title>Opening Trendyol...</title>
   <style>
     body {
       font-family: sans-serif;
@@ -31,75 +28,59 @@
       margin-bottom: 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .instruction {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      margin-top: 10px;
-    }
-    .instruction p { font-size: 15px; line-height: 1.5; margin: 0; }
+    .buttons { display: none; flex-direction: column; gap: 12px; margin-top: 20px; width: 100%; max-width: 300px; }
     .btn {
-      padding: 14px 24px;
+      padding: 14px;
       border-radius: 10px;
       font-size: 16px;
       font-weight: bold;
       text-decoration: none;
       text-align: center;
-      width: 100%;
-      max-width: 300px;
-      box-sizing: border-box;
     }
-    .btn-white { background: white; color: #F27A1A; border: none; cursor: pointer; }
+    .btn-white { background: white; color: #F27A1A; }
     .btn-outline { background: transparent; color: white; border: 2px solid white; }
-    .dots { font-size: 28px; letter-spacing: 4px; margin-top: 4px; }
   </style>
 </head>
 <body>
   <div class="spinner" id="spinner"></div>
-  <p id="message">Just a moment...</p>
-
-  <!-- Shown only inside TikTok browser -->
-  <div class="instruction" id="instruction">
-    <div class="dots">⋯</div>
-    <p>Tap the <strong>3 dots</strong> in the top right corner<br>then select <strong>"Open in browser"</strong></p>
-    <p style="font-size:13px; opacity:0.85">This lets the Trendyol app open properly</p>
-    <a class="btn btn-outline" id="fallbackBtn" href="#">Or tap here to open in browser</a>
+  <p id="message">Opening in Trendyol...</p>
+  <div class="buttons" id="buttons">
+    <a class="btn btn-white" href="https://www.trendyol.com/ro/magarde/bluza-premium-din-dantela-cu-decolteu-rotund-negru-p-1100370216?boutiqueId=48&merchantId=968&adjust_t=ai34kpn_77icnip&adjust_creative=1100370216&timestamp=1779711013&adjust_campaign=b2c_aff_pdp_de&link_userID=183722368&adjust_adgroup=183722368&utm_term=1100370216&link_contentid=1100370216&utm_campaign=183722368&utm_source=influencer&utm_medium=b2c_aff_pdp_de">
+      View in Browser
+    </a>
+    <a class="btn btn-outline" id="storeBtn" href="#">
+      Download Trendyol App
+    </a>
   </div>
 
   <script>
-    const dest = ["https://ty", ".gl/otkiqrb935h5e"].join("");
+    const productUrl = "https://www.trendyol.com/ro/magarde/bluza-premium-din-dantela-cu-decolteu-rotund-negru-p-1100370216?boutiqueId=48&merchantId=968&adjust_t=ai34kpn_77icnip&adjust_creative=1100370216&timestamp=1779711013&adjust_campaign=b2c_aff_pdp_de&link_userID=183722368&adjust_adgroup=183722368&utm_term=1100370216&link_contentid=1100370216&utm_campaign=183722368&utm_source=influencer&utm_medium=b2c_aff_pdp_de";
+    const deepLink = "ty://?Page=Product&ContentId=1100370216";
+    const appStoreUrl = "https://apps.apple.com/app/trendyol/id524362642";
+    const playStoreUrl = "https://play.google.com/store/apps/details?id=trendyol.com.tr";
 
-    // Detect TikTok WebView
-    const isTikTok = /musical_ly|tiktok/i.test(navigator.userAgent);
+    // Detect platform
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
 
-    document.getElementById("fallbackBtn").href = dest;
+    // Set correct store link
+    const storeBtn = document.getElementById("storeBtn");
+    if (isIOS) storeBtn.href = appStoreUrl;
+    else if (isAndroid) storeBtn.href = playStoreUrl;
+    else storeBtn.style.display = "none"; // Hide on desktop
 
-    if (isTikTok) {
-      // Can't auto-redirect from TikTok WebView — instruct user to open in system browser
-      setTimeout(() => {
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("message").style.display = "none";
-        document.getElementById("instruction").style.display = "flex";
-      }, 800);
-    } else {
-      // Outside TikTok — normal redirect
-      window.location = dest;
+    // Try opening the app
+    window.location = deepLink;
 
-      setTimeout(() => {
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("message").textContent = "Tap below to continue.";
+    // If app not installed, show fallback buttons after 2s
+    setTimeout(() => {
+      document.getElementById("spinner").style.display = "none";
+      document.getElementById("message").textContent = "Couldn't open the Trendyol app.";
+      document.getElementById("buttons").style.display = "flex";
+    }, 2000);
 
-        const btn = document.createElement("a");
-        btn.className = "btn btn-white";
-        btn.href = dest;
-        btn.textContent = "Open Page";
-        btn.style.marginTop = "16px";
-        document.body.appendChild(btn);
-      }, 2000);
-    }
+    // If app opened successfully, the page goes to background
+    // and the timeout won't visibly fire — so this is safe
   </script>
 </body>
 </html>
