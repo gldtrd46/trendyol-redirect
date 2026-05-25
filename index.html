@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+</head>
+<body>
+  <script>
+    // Try to open Trendyol app
+    window.location = "ty://?Page=Product&ContentId=1100370216";
+
+    // If app not installed, open website after 1.5s
+    setTimeout(() => {
+      window.location = "https://www.trendyol.com/en/magarde/permium-lace-crew-neck-blouse-black-p-1100370216";
+    }, 1500);
+  </script>
+
+  <p>Opening Trendyol... <a href="https://www.trendyol.com/en/magarde/permium-lace-crew-neck-blouse-black-p-1100370216">Click here</a> if nothing happens.</p>
+</body>
+</html>
