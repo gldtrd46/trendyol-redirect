@@ -43,10 +43,10 @@
 </head>
 <body>
   <div class="spinner" id="spinner"></div>
-  <p id="message">Opening in Trendyol...</p>
+  <p id="message">Opening Trendyol...</p>
   <div class="buttons" id="buttons">
-    <a class="btn btn-white" href="https://www.trendyol.com/ro/magarde/bluza-premium-din-dantela-cu-decolteu-rotund-negru-p-1100370216?boutiqueId=48&merchantId=968&adjust_t=ai34kpn_77icnip&adjust_creative=1100370216&timestamp=1779711013&adjust_campaign=b2c_aff_pdp_de&link_userID=183722368&adjust_adgroup=183722368&utm_term=1100370216&link_contentid=1100370216&utm_campaign=183722368&utm_source=influencer&utm_medium=b2c_aff_pdp_de">
-      View in Browser
+    <a class="btn btn-white" id="productBtn" href="#">
+      Open Trendyol
     </a>
     <a class="btn btn-outline" id="storeBtn" href="#">
       Download Trendyol App
@@ -54,33 +54,45 @@
   </div>
 
   <script>
-    const productUrl = "https://www.trendyol.com/ro/magarde/bluza-premium-din-dantela-cu-decolteu-rotund-negru-p-1100370216?boutiqueId=48&merchantId=968&adjust_t=ai34kpn_77icnip&adjust_creative=1100370216&timestamp=1779711013&adjust_campaign=b2c_aff_pdp_de&link_userID=183722368&adjust_adgroup=183722368&utm_term=1100370216&link_contentid=1100370216&utm_campaign=183722368&utm_source=influencer&utm_medium=b2c_aff_pdp_de";
-    const deepLink = "ty://?Page=Product&ContentId=1100370216";
+    const defaultProductUrl = "https://www.trendyol.com/ro/magarde/bluza-premium-din-dantela-cu-decolteu-rotund-negru-p-1100370216?boutiqueId=48&merchantId=968&adjust_t=ai34kpn_77icnip&adjust_creative=1100370216&timestamp=1779711013&adjust_campaign=b2c_aff_pdp_de&link_userID=183722368&adjust_adgroup=183722368&utm_term=1100370216&link_contentid=1100370216&utm_campaign=183722368&utm_source=influencer&utm_medium=b2c_aff_pdp_de";
+    function getProductUrl() {
+      const prefix = "?url=";
+      if (!window.location.search.startsWith(prefix)) return defaultProductUrl;
+
+      const pastedUrl = decodeURIComponent(window.location.search.slice(prefix.length));
+      try {
+        const parsedUrl = new URL(pastedUrl);
+        return parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:"
+          ? parsedUrl.href
+          : defaultProductUrl;
+      } catch {
+        return defaultProductUrl;
+      }
+    }
+
+    const productUrl = getProductUrl();
     const appStoreUrl = "https://apps.apple.com/app/trendyol/id524362642";
     const playStoreUrl = "https://play.google.com/store/apps/details?id=trendyol.com.tr";
 
-    // Detect platform
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
 
-    // Set correct store link
+    document.getElementById("productBtn").href = productUrl;
+
     const storeBtn = document.getElementById("storeBtn");
     if (isIOS) storeBtn.href = appStoreUrl;
     else if (isAndroid) storeBtn.href = playStoreUrl;
-    else storeBtn.style.display = "none"; // Hide on desktop
+    else storeBtn.style.display = "none";
 
-    // Try opening the app
-    window.location = deepLink;
+    // Route through the tracked Trendyol URL so attribution parameters are preserved.
+    window.location = productUrl;
 
-    // If app not installed, show fallback buttons after 2s
+    // If automatic routing is blocked, show fallback buttons after 2s.
     setTimeout(() => {
       document.getElementById("spinner").style.display = "none";
-      document.getElementById("message").textContent = "Couldn't open the Trendyol app.";
+      document.getElementById("message").textContent = "Couldn't open Trendyol automatically.";
       document.getElementById("buttons").style.display = "flex";
     }, 2000);
-
-    // If app opened successfully, the page goes to background
-    // and the timeout won't visibly fire — so this is safe
   </script>
 </body>
 </html>
