@@ -2,7 +2,8 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Opening Trendyol...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Open Trendyol</title>
   <style>
     body {
       font-family: sans-serif;
@@ -10,7 +11,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
       background: #F27A1A;
       color: white;
@@ -28,7 +29,14 @@
       margin-bottom: 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .buttons { display: none; flex-direction: column; gap: 12px; margin-top: 20px; width: 100%; max-width: 300px; }
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 300px;
+    }
     .btn {
       padding: 14px;
       border-radius: 10px;
@@ -42,11 +50,11 @@
   </style>
 </head>
 <body>
-  <div class="spinner" id="spinner"></div>
-  <p id="message">Opening Trendyol...</p>
-  <div class="buttons" id="buttons">
-    <a class="btn btn-white" id="productBtn" href="#">
-      Open Trendyol
+  <div class="spinner"></div>
+  <p>Tap below to open Trendyol.</p>
+  <div class="buttons">
+    <a class="btn btn-white" id="trendyolBtn" href="#">
+      Open in Trendyol
     </a>
     <a class="btn btn-outline" id="storeBtn" href="#">
       Download Trendyol App
@@ -54,95 +62,36 @@
   </div>
 
   <script>
-    const defaultProductUrl = "https://www.trendyol.com/ro/magarde/bluza-premium-din-dantela-cu-decolteu-rotund-negru-p-1100370216?boutiqueId=48&merchantId=968&adjust_t=ai34kpn_77icnip&adjust_creative=1100370216&timestamp=1779711013&adjust_campaign=b2c_aff_pdp_de&link_userID=183722368&adjust_adgroup=183722368&utm_term=1100370216&link_contentid=1100370216&utm_campaign=183722368&utm_source=influencer&utm_medium=b2c_aff_pdp_de";
-    function getProductUrl() {
+    const defaultTrendyolLink = "https://ty.gl/3htqcdbuc7v08";
+
+    function getTrendyolLink() {
       const prefix = "?url=";
-      if (!window.location.search.startsWith(prefix)) return defaultProductUrl;
+      if (!window.location.search.startsWith(prefix)) return defaultTrendyolLink;
 
       const pastedUrl = decodeURIComponent(window.location.search.slice(prefix.length));
       try {
         const parsedUrl = new URL(pastedUrl);
         return parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:"
           ? parsedUrl.href
-          : defaultProductUrl;
+          : defaultTrendyolLink;
       } catch {
-        return defaultProductUrl;
+        return defaultTrendyolLink;
       }
     }
 
-    function getProductContentId(url) {
-      try {
-        const parsedUrl = new URL(url);
-        const contentId = parsedUrl.searchParams.get("link_contentid")
-          || parsedUrl.searchParams.get("adjust_creative")
-          || parsedUrl.pathname.match(/-p-(\d+)/)?.[1];
-
-        return contentId && /^\d+$/.test(contentId) ? contentId : null;
-      } catch {
-        return null;
-      }
-    }
-
-    function buildDeepLink(url) {
-      const contentId = getProductContentId(url);
-      if (!contentId) return null;
-
-      const deepLinkParams = new URLSearchParams({
-        Page: "Product",
-        ContentId: contentId,
-      });
-
-      return `ty://?${deepLinkParams.toString()}`;
-    }
-
-    function openTrackedUrlInBackground(url) {
-      const frame = document.createElement("iframe");
-      frame.src = url;
-      frame.style.display = "none";
-      frame.setAttribute("aria-hidden", "true");
-      document.body.appendChild(frame);
-    }
-
-    function openTrendyol() {
-      openTrackedUrlInBackground(productUrl);
-
-      if (deepLink) {
-        setTimeout(() => {
-          window.location = deepLink;
-        }, 700);
-      } else {
-        window.location = productUrl;
-      }
-    }
-
-    const productUrl = getProductUrl();
-    const deepLink = buildDeepLink(productUrl);
+    const trendyolLink = getTrendyolLink();
     const appStoreUrl = "https://apps.apple.com/app/trendyol/id524362642";
     const playStoreUrl = "https://play.google.com/store/apps/details?id=trendyol.com.tr";
 
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
 
-    const productBtn = document.getElementById("productBtn");
-    productBtn.href = deepLink || productUrl;
-    productBtn.addEventListener("click", () => {
-      openTrackedUrlInBackground(productUrl);
-    });
+    document.getElementById("trendyolBtn").href = trendyolLink;
 
     const storeBtn = document.getElementById("storeBtn");
     if (isIOS) storeBtn.href = appStoreUrl;
     else if (isAndroid) storeBtn.href = playStoreUrl;
     else storeBtn.style.display = "none";
-
-    // Best effort: touch the tracked URL first, then force the native app route.
-    openTrendyol();
-
-    // If automatic routing is blocked, show fallback buttons after 2s.
-    setTimeout(() => {
-      document.getElementById("spinner").style.display = "none";
-      document.getElementById("message").textContent = "Couldn't open Trendyol automatically.";
-      document.getElementById("buttons").style.display = "flex";
-    }, 2000);
   </script>
 </body>
 </html>
