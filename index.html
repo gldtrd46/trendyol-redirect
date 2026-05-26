@@ -70,22 +70,72 @@
       }
     }
 
+    function getProductContentId(url) {
+      try {
+        const parsedUrl = new URL(url);
+        const contentId = parsedUrl.searchParams.get("link_contentid")
+          || parsedUrl.searchParams.get("adjust_creative")
+          || parsedUrl.pathname.match(/-p-(\d+)/)?.[1];
+
+        return contentId && /^\d+$/.test(contentId) ? contentId : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function buildDeepLink(url) {
+      const contentId = getProductContentId(url);
+      if (!contentId) return null;
+
+      const deepLinkParams = new URLSearchParams({
+        Page: "Product",
+        ContentId: contentId,
+      });
+
+      return `ty://?${deepLinkParams.toString()}`;
+    }
+
+    function openTrackedUrlInBackground(url) {
+      const frame = document.createElement("iframe");
+      frame.src = url;
+      frame.style.display = "none";
+      frame.setAttribute("aria-hidden", "true");
+      document.body.appendChild(frame);
+    }
+
+    function openTrendyol() {
+      openTrackedUrlInBackground(productUrl);
+
+      if (deepLink) {
+        setTimeout(() => {
+          window.location = deepLink;
+        }, 700);
+      } else {
+        window.location = productUrl;
+      }
+    }
+
     const productUrl = getProductUrl();
+    const deepLink = buildDeepLink(productUrl);
     const appStoreUrl = "https://apps.apple.com/app/trendyol/id524362642";
     const playStoreUrl = "https://play.google.com/store/apps/details?id=trendyol.com.tr";
 
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
 
-    document.getElementById("productBtn").href = productUrl;
+    const productBtn = document.getElementById("productBtn");
+    productBtn.href = deepLink || productUrl;
+    productBtn.addEventListener("click", () => {
+      openTrackedUrlInBackground(productUrl);
+    });
 
     const storeBtn = document.getElementById("storeBtn");
     if (isIOS) storeBtn.href = appStoreUrl;
     else if (isAndroid) storeBtn.href = playStoreUrl;
     else storeBtn.style.display = "none";
 
-    // Route through the tracked Trendyol URL so attribution parameters are preserved.
-    window.location = productUrl;
+    // Best effort: touch the tracked URL first, then force the native app route.
+    openTrendyol();
 
     // If automatic routing is blocked, show fallback buttons after 2s.
     setTimeout(() => {
